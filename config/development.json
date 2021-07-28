@@ -6,7 +6,7 @@
     "console": true
   },
   "mongoDb": {
-    "uri": "mongodb://localhost:27017/boilerplate-development"
+    "uri": "mongodb+srv://jalan:jalan@cluster0.pu5pp.mongodb.net/todo-app-db?retryWrites=true&w=majority"
   },
   "www": {
     "port": 4200
