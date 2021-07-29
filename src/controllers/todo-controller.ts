@@ -1,7 +1,7 @@
 import { Validation } from '@helpers';
 import { AppContext, Errors, ExtendedRequest, ValidationFailure } from '@typings';
 import { NextFunction, Response, Router } from 'express';
-import { createTodoValidator } from '@validators';
+import { createTodoValidator, fetchTodoValidator } from '@validators';
 import { BaseController } from './base-controller';
 import { Todo } from '@models';
 
@@ -16,6 +16,7 @@ export class TodoController extends BaseController {
 
   private initializeRoutes() {
     this.router.post(`${this.basePath}/todos`, createTodoValidator(this.appContext), this.createTodo);
+    this.router.get(`${this.basePath}/todos/:id`, fetchTodoValidator(this.appContext), this.fetchTodo);
   }
 
   private createTodo = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
@@ -36,5 +37,23 @@ export class TodoController extends BaseController {
     );
 
     res.status(201).json(todo.serialize());
+  }
+
+  private fetchTodo = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    const failures: ValidationFailure[] = Validation.extractValidationErrors(req);
+
+    if (failures.length > 0) {
+      const valError = new Errors.ValidationError(res.__('DEFAULT_ERRORS.VALIDATION_FAILED'), failures);
+
+      return next(valError);
+    }
+
+    const { id } = req.params;
+
+    const todo = await this.appContext.todoRepository.findOne({
+      _id: id
+    });
+
+    res.status(200).json(todo.serialize());
   }
 }
