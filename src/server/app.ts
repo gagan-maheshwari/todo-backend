@@ -10,6 +10,7 @@ import {
   AccountController,
   BaseController,
   HealthCheckController,
+  TodoController
 } from '@controllers';
 import { ErrorHandler } from '@middleware';
 import { EventListeners, logger } from '@server';
@@ -87,8 +88,9 @@ export class App {
 
   public initializeControllers() {
     const controllers: BaseController[] = [
-      new AccountController(this.ctx),
+      // new AccountController(this.ctx),
       new HealthCheckController(this.ctx),
+      new TodoController(this.ctx),
     ];
 
     for (const ctrl of controllers) {

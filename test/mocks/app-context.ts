@@ -1,5 +1,5 @@
-import { Repositories } from '@storage';
-import { AppContext } from '@typings';
+import { Repositories } from '../../src/storage';
+import { AppContext } from '../../src/typings';
 import { MockLogger } from './mock-logger';
 import { InMemoryMongoStore } from './in-memory-mongo-store';
 
@@ -15,4 +15,5 @@ export const respositoryContext = {
 export const testAppContext: AppContext = {
   logger: mockLogger,
   accountRepository: new Repositories.AccountRepository(respositoryContext),
+  todoRepository: new Repositories.TodoRepository(respositoryContext)
 };
