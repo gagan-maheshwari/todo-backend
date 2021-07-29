@@ -64,3 +64,35 @@ describe("POST /todo", () => {
     expect(res.body).to.have.nested.property("failures[0].message").to.equal("This todo item already exists. Please try a new one.");
   });
 });
+
+describe("DELETE /todos/:id", () => {
+  it("should delete a todo item", async () => {
+    const todo = await testAppContext.todoRepository.save(
+      new Todo({
+        title: "To be deleted"
+      })
+    );
+
+    const res = await chai.request(expressApp).delete(`/todo/todos/${todo._id}`);
+    
+    expect(res).to.have.status(200);
+    expect(res.body).to.have.property("success").to.equal(true);
+    expect(res.body).to.have.property("deletedCount").to.equal(1);
+  });
+
+  it("should throw an error message if the id is not present", async () => {
+
+    const res = await chai.request(expressApp).delete("/todo/todos/asdf");
+    
+    expect(res).to.have.status(400);
+    expect(res.body).to.have.nested.property("failures[0].message").to.equal("The id is invalid. Please rectify.");
+  });
+
+  it("should throw an error message if the id has been deleted already", async () => {
+
+    const res = await chai.request(expressApp).delete("/todo/todos/6102b70eca135d222aa3d402");
+    
+    expect(res).to.have.status(400);
+    expect(res.body).to.have.nested.property("failures[0].message").to.equal("This id was not found. Kindly recheck.");
+  });
+});
