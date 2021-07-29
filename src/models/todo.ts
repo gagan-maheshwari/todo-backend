@@ -1,5 +1,5 @@
-import {LooseObject} from '@typings';
-import {BaseModel} from "./base-model";
+import { LooseObject } from '@typings';
+import { BaseModel } from './base-model';
 
 export class Todo extends BaseModel {
   title: string;
@@ -7,7 +7,7 @@ export class Todo extends BaseModel {
   constructor(json?: any) {
     super(json);
 
-    if(json) {
+    if (json) {
       this.title = json.title;
     }
   }

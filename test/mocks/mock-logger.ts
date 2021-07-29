@@ -1,4 +1,4 @@
-import { Logger } from '@typings';
+import { Logger } from '../../src/typings';
 
 export class MockLogger implements Logger {
   error(message: string, ...meta: any[]): Logger {

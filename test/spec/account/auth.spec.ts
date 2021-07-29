@@ -9,9 +9,9 @@ import chaiHttp from 'chai-http';
 import { Application } from 'express';
 import { respositoryContext, testAppContext } from '../../mocks/app-context';
 
-import { AuthHelper } from '@helpers';
-import { App } from '@server';
-import { Account } from '@models';
+import { AuthHelper } from '../../../src/helpers';
+import { App } from '../../../src/server';
+import { Account } from '../../../src/models';
 
 chai.use(chaiHttp);
 const expect = chai.expect;
