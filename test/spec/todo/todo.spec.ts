@@ -64,3 +64,58 @@ describe("POST /todo", () => {
     expect(res.body).to.have.nested.property("failures[0].message").to.equal("This todo item already exists. Please try a new one.");
   });
 });
+
+describe("PUT /todos/:id", () => {
+  it("should update a todo item", async () => {
+    const todo = await testAppContext.todoRepository.save(
+      new Todo({
+        title: "To be updated"
+      })
+    );
+
+    const newTitle = "Item Updated";
+
+    const res = await chai.request(expressApp).put(`/todo/todos/${todo._id}`).send({
+      title: newTitle
+    });
+    
+    expect(res).to.have.status(200);
+    expect(res.body).to.have.property("id").to.equal(String(todo._id));
+    expect(res.body).to.have.property("title").to.equal(newTitle);
+  });
+
+  it("should throw an error message if the updated text is same as the original text", async () => {
+    const todo = await testAppContext.todoRepository.save(
+      new Todo({
+        title: "To be updated"
+      })
+    );
+
+    const newTitle = "To be updated";
+
+    const res = await chai.request(expressApp).put(`/todo/todos/${todo._id}`).send({
+      title: newTitle
+    });
+    
+    expect(res).to.have.status(400);
+    expect(res.body).to.have.nested.property("failures[0].message").to.equal("No changes found in the request.");
+  });
+
+  it("should throw an error message if the id is invalid", async () => {
+    const res = await chai.request(expressApp).put("/todo/todos/asdf").send({
+      title: "asdf"
+    });
+    
+    expect(res).to.have.status(400);
+    expect(res.body).to.have.nested.property("failures[0].message").to.equal("The id is invalid. Please rectify.");
+  });
+
+  it("should throw an error message if the id doesn't exist in the db", async () => {
+    const res = await chai.request(expressApp).put("/todo/todos/6102b70eca135d222aa3d402").send({
+      title: "asdf"
+    });
+    
+    expect(res).to.have.status(400);
+    expect(res.body).to.have.nested.property("failures[0].message").to.equal("This id was not found. Kindly recheck.");
+  });
+});
