@@ -3,6 +3,7 @@ import chaiHttp from 'chai-http';
 import { Application } from 'express';
 import {Todo} from '../../../src/models';
 import {App} from '../../../src/server';
+import {todo} from '../../../src/storage/mongoose';
 import {respositoryContext, testAppContext} from '../../mocks/app-context';
 
 chai.use(chaiHttp);
@@ -62,5 +63,59 @@ describe("POST /todo", () => {
     expect(res).to.have.status(400);
     expect(res.body).to.have.property("message");
     expect(res.body).to.have.nested.property("failures[0].message").to.equal("This todo item already exists. Please try a new one.");
+  });
+});
+
+describe("GET /todos", () => {
+  it("should GET the list of all todo items", async () => {
+    const res = await chai.request(expressApp).get(`/todo/todos`);
+  
+    expect(res).to.have.status(200);
+    expect(res.body).to.be.an("array");
+  });
+
+  it("should list all todos in the same order as they were created", async () => {    
+    await chai.request(expressApp).post("/todo/todos").send({
+      title: "ONE",
+    });
+
+    await chai.request(expressApp).post("/todo/todos").send({
+      title: "TWO",
+    });
+
+    await chai.request(expressApp).post("/todo/todos").send({
+      title: "THREE",
+    });
+
+    const getTodoItemFromMongoose = (data: object) => {
+      return new Todo(data).serialize();
+    };
+
+    const convertObjectToString = (data: any) => {
+      data.id = data.id.toString();
+      return data;
+    };
+
+    const res = await chai.request(expressApp).get("/todo/todos");
+  
+    expect(res).to.have.status(200);
+    expect(res.body).to.be.an("array");
+
+    todo.find({}, function (err, data) {
+      expect(res.body).to.deep.equal(
+        data.map(getTodoItemFromMongoose).map(convertObjectToString)
+      );
+    });
+  });
+
+  it("should return an empty array if there's no todo item", async () => {
+    await testAppContext.todoRepository.getAll();
+    await testAppContext.todoRepository.deleteMany({});
+
+    const res = await chai.request(expressApp).get("/todo/todos");
+    
+    expect(res).to.have.status(200);
+    expect(res.body).to.be.an("array");
+    expect(res.body).to.deep.equal([]);
   });
 });
