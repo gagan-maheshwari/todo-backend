@@ -64,3 +64,37 @@ describe("POST /todo", () => {
     expect(res.body).to.have.nested.property("failures[0].message").to.equal("This todo item already exists. Please try a new one.");
   });
 });
+
+describe("GET /todos/:id", () => {
+  it("should GET a todo item", async () => {
+    const title = "Item to be fetched";
+
+    const todo = await testAppContext.todoRepository.save(
+      new Todo({
+        title: title
+      })
+    );
+
+    const res = await chai.request(expressApp).get(`/todo/todos/${todo._id}`);
+    
+    expect(res).to.have.status(200);
+    expect(res.body).to.have.property("id").to.equal(String(todo._id));
+    expect(res.body).to.have.property("title").to.equal(title);
+  });
+
+  it("should throw an error message if the id is not valid", async () => {
+
+    const res = await chai.request(expressApp).get("/todo/todos/asdf");
+    
+    expect(res).to.have.status(400);
+    expect(res.body).to.have.nested.property("failures[0].message").to.equal("The id is invalid. Please rectify.");
+  });
+
+  it("should throw an error message if the id does not exist", async () => {
+
+    const res = await chai.request(expressApp).get("/todo/todos/6102b70eca135d222aa3d402");
+    
+    expect(res).to.have.status(400);
+    expect(res.body).to.have.nested.property("failures[0].message").to.equal("This id was not found. Kindly recheck.");
+  });
+});
